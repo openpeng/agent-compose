@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-compose"
+version = "1.0.0"
+description = "YAML-based agent orchestrator - declare agents, teams, and workflows in YAML"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "agent-hub" }]
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+agent-compose = "agent_compose.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["agent_compose*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"

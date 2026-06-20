@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.eggs/
+build/
+dist/
+pip-wheel-metadata/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS / System
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Cache / temp files
+.cache/
+*.log
+tmp/
+data/
+downloaded-agents/
+imported-agents/
+.uploads/
+e2e_out/
+
+# Test / verify outputs
+__pycache__/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# env
+.env
+.env.*

@@ -1,0 +1,35 @@
+agents:
+  web_researcher:
+    role: "Web Researcher"
+    description: "Research the web and summarize findings"
+    instructions:
+      - "You are a web research assistant."
+      - "Use web_search to find information."
+      - "Provide concise summaries."
+    tools:
+      builtin:
+        - web_search
+      skills:
+        - data_analyzer
+    model:
+      provider: openai
+      id: gpt-4o
+    markdown: true
+
+  code_assistant:
+    role: "Code Assistant"
+    description: "Help write and review code"
+    instructions:
+      - "You are a code review assistant."
+      - "Use file_reader to read project files."
+      - "Write clean, documented code."
+    tools:
+      builtin:
+        - file_reader
+        - calculator
+    model:
+      provider: anthropic
+      id: claude-sonnet-4
+    memory:
+      type: short_term
+      table_name: code_memory

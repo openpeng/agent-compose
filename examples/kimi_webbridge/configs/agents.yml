@@ -1,0 +1,31 @@
+# Kimi WebBridge Agent 配置
+# 这是一个使用 Kimi LLM API + Kimi WebBridge (MCP) 的完整 Agent 配置
+# 通过 WebBridge，Agent 可以像你一样操作浏览器
+
+agents:
+  webbridge_agent:
+    role: "Web Browser Operator"
+    description: "通过 Kimi WebBridge 操作浏览器完成任务的智能助手"
+    instructions:
+      - "你是一个智能浏览器操作助手，可以通过 WebBridge 操作网页"
+      - "使用 webbridge_mcp 提供的工具来操作浏览器"
+      - "打开网页时，使用 page_navigate 或 page_open 工具"
+      - "点击页面元素时，使用 page_click 工具"
+      - "提取页面信息时，使用 page_extract 工具"
+      - "始终先打开目标网页，再执行后续操作"
+      - "完成任务后，提供清晰的总结信息"
+    tools:
+      mcps:
+        - kimi_webbridge
+      builtin:
+        - web_search
+    model:
+      provider: kimi
+      id: mochi-v2-5
+      api_key: "${KIMI_API_KEY}"
+      base_url: "https://api.moonshot.cn/v1"
+    memory:
+      type: short_term
+    markdown: true
+    add_datetime_to_instructions: true
+    debug_mode: true

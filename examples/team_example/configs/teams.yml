@@ -1,0 +1,33 @@
+teams:
+  content_team:
+    name: "ContentTeam"
+    mode: coordinate
+    description: "A team that researches and writes content"
+    instructions:
+      - "Coordinate research and writing tasks"
+      - "Deliver high-quality content"
+    shared_state: true
+    agents:
+      - name: web_researcher
+        role: "Web Researcher"
+        description: "Research the web"
+        instructions:
+          - "Use web search effectively"
+      - name: content_writer
+        role: "Content Writer"
+        description: "Write polished content"
+    leader:
+      name: team_lead
+      role: "Team Leader"
+      description: "Lead and coordinate the team"
+      instructions:
+        - "Assign tasks to team members"
+        - "Review final outputs"
+    deploy:
+      version: "1.0.0"
+      author: "team@company.com"
+      category: "content"
+      tags: ["team", "content"]
+      targets:
+        - agentos
+        - cursor

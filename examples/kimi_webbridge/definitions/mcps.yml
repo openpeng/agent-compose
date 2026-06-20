@@ -1,0 +1,7 @@
+mcps:
+  kimi_webbridge:
+    name: "Kimi WebBridge"
+    description: "Kimi 浏览器桥接插件"
+    type: sse
+    url: "http://127.0.0.1:6001/sse"
+    auth_token: "${WEBBRIDGE_TOKEN}"

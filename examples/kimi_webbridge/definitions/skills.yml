@@ -1,0 +1,5 @@
+skills:
+  web_planner:
+    name: "WebPlanner"
+    description: "规划网页操作步骤"
+    source: "skills/web_planner.py"

@@ -1,0 +1,39 @@
+skills:
+  data_analyzer:
+    name: "DataAnalyzer"
+    description: "Analyze structured data"
+    source: "skills/data_analyzer.py"
+
+  code_reviewer:
+    name: "CodeReviewer"
+    description: "Review code for quality and style"
+
+mcps:
+  filesystem:
+    name: "FileSystem"
+    type: stdio
+    command: "npx"
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-filesystem"
+      - "/tmp/workspace"
+    env: {}
+
+  web_search_mcp:
+    name: "WebSearch"
+    type: sse
+    url: "https://mcp.example.com/search"
+    auth_token: "${MCP_TOKEN}"
+
+agents:
+  base_researcher:
+    role: "Researcher"
+    description: "Base researcher template"
+    markdown: true
+    add_datetime_to_instructions: true
+
+tools:
+  web_search_tool:
+    name: "WebSearch"
+    params:
+      provider: "duckduckgo"

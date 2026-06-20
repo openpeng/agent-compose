@@ -1,0 +1,51 @@
+workflows:
+  article_pipeline:
+    name: "Article Pipeline"
+    description: "Research, write, and publish an article"
+    entry_task: "research"
+    inputs:
+      - topic
+    outputs:
+      - final_article
+    steps:
+      - name: research
+        type: agent
+        agent: web_researcher
+        agent_config:
+          role: "Web Researcher"
+          description: "Research the topic thoroughly"
+          tools:
+            builtin:
+              - web_search
+        input: "Research topic: ${topic}"
+        output_key: research_notes
+
+      - name: quality_check
+        type: condition
+        evaluator: evaluators.quality:meets_quality_threshold
+        cases:
+          pass:
+            - name: write
+              type: agent
+              agent: content_writer
+              input: "Write an article from: {research_notes}"
+              output_key: draft
+          fail:
+            - name: re_research
+              type: agent
+              agent: web_researcher
+              input: "Need more details on: {research_notes}"
+              output_key: research_notes
+
+      - name: publish
+        type: function
+        function: handlers.publish:to_blog
+        args:
+          title: "Latest Article"
+          content: "{draft}"
+        output_key: published_url
+    deploy:
+      version: "1.0.0"
+      author: "workflow@company.com"
+      category: "pipeline"
+      tags: ["article", "pipeline"]
