@@ -29,6 +29,9 @@ from typing import Dict, Any, List, Optional, Tuple
 
 from .market_client import MarketClient
 from .kimi_webbridge_client import KimiWebBridgeClient
+from .pipeline_engine import PipelineEngine, ExecutionContext, ToolRegistry
+from .tools import register_builtin_tools
+from .observability import Observability, set_trace_context, TraceContext
 
 
 class AgentRuntime:
@@ -76,6 +79,12 @@ class AgentRuntime:
 
         # 动态工具 schema
         self._available_tools = []  # 从 MCP 获取的 tools
+
+        # PipelineEngine 相关
+        self.pipeline_engine: Optional[PipelineEngine] = None
+        self.tool_registry = ToolRegistry()
+        register_builtin_tools(self.tool_registry)
+        self.observability: Optional[Observability] = None
 
     # ---------- 信息 ----------
 
@@ -649,6 +658,66 @@ class AgentRuntime:
                 v = v[:77] + "..."
             parts.append(f"{k}={json.dumps(v, ensure_ascii=False)}")
         return ", ".join(parts)
+
+    # ---------- PipelineEngine ----------
+
+    def initialize_pipeline_engine(self) -> PipelineEngine:
+        """初始化 PipelineEngine，使用当前 tool_registry"""
+        self.pipeline_engine = PipelineEngine(tool_registry=self.tool_registry)
+        return self.pipeline_engine
+
+    def execute_pipeline(
+        self,
+        pipeline_config: dict,
+        initial_args: dict = None,
+        timeout_ms: int = None,
+    ) -> dict:
+        """执行流水线配置
+
+        Args:
+            pipeline_config: 流水线配置字典
+            initial_args: 初始参数
+            timeout_ms: 超时时间（毫秒）
+
+        Returns:
+            执行结果字典: {"success": bool, "output": Any, "steps": list, "duration_ms": float}
+        """
+        import asyncio
+
+        if self.pipeline_engine is None:
+            self.initialize_pipeline_engine()
+
+        context = ExecutionContext(
+            agent_id=self.agent_id,
+            initial_args=initial_args or {},
+        )
+
+        # 设置 trace 上下文
+        set_trace_context(
+            TraceContext(agent_id=self.agent_id)
+        )
+
+        # PipelineEngine.execute 是异步方法，需要运行事件循环
+        result = asyncio.run(
+            self.pipeline_engine.execute(
+                pipeline_config=pipeline_config,
+                context=context,
+                timeout_ms=timeout_ms,
+            )
+        )
+        return result
+
+    def setup_observability(self, service_name: str = "agent-compose") -> Observability:
+        """初始化可观测性模块
+
+        Args:
+            service_name: 服务名称
+
+        Returns:
+            Observability 实例
+        """
+        self.observability = Observability(service_name=service_name)
+        return self.observability
 
     # ---------- 工厂方法 ----------
 

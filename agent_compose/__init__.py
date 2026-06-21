@@ -1,4 +1,180 @@
 from agent_compose.orchestrator import YamlOrchestrator
+from agent_compose.agent_runtime import AgentRuntime
+from agent_compose.agent_runtime_server import AgentRuntimeServer
+from agent_compose.session_store import (
+    SessionState,
+    SessionStoreBase,
+    MemorySessionStore,
+    FileSessionStore,
+    RedisSessionStore,
+    create_session_store,
+)
+from agent_compose.agentos_client import AgentOSClient
+from agent_compose.pipeline_engine import (
+    PipelineEngine,
+    ExecutionContext,
+    StepResult,
+    TemplateResolver,
+    ToolRegistry,
+)
+from agent_compose.tools import (
+    bash_tool,
+    read_file_tool,
+    write_file_tool,
+    glob_tool,
+    llm_chat_tool,
+    web_search_tool,
+    web_fetch_tool,
+    register_builtin_tools,
+)
+from agent_compose.observability import (
+    Observability,
+    StructuredLogger,
+    LogLevel,
+    Tracer,
+    Span,
+    MetricsCollector,
+    PerformanceProfiler,
+    get_logger,
+    set_logger,
+    get_trace_context,
+    set_trace_context,
+)
+from agent_compose.adapters import (
+    ImportAdapter,
+    AdapterRegistry,
+    CursorAdapter,
+    ClaudeAdapter,
+    CodeBuddyAdapter,
+    GitHubAdapter,
+    VSCodeAdapter,
+    JetBrainsAdapter,
+    OpenAIGPTsAdapter,
+    GenericMarkdownAdapter,
+    create_default_registry,
+)
+from agent_compose.market_client import (
+    MarketClient,
+    AgentInfo,
+    VersionInfo,
+    SearchResult,
+    UploadResult,
+    DownloadResult,
+    VersionDiff,
+)
+from agent_compose.deployer import Deployer
+from agent_compose.resilience import (
+    CircuitBreaker,
+    CircuitBreakerOpenError,
+    RetryPolicy,
+    RetryExhaustedError,
+    FallbackRegistry,
+    resilient_call,
+)
+from agent_compose.resource_limits import (
+    ResourceLimiter,
+    ResourceMonitor,
+    MemoryLimitExceeded,
+    CPULimitExceeded,
+    FDLimitExceeded,
+    with_resource_limits,
+    set_process_limits,
+)
+from agent_compose.hot_reload import (
+    ConfigWatcher,
+    HotReloadManager,
+    FileSnapshot,
+    create_agent_reload_manager,
+    watch_file,
+)
+from agent_compose.log_rotation import (
+    RotatingFileHandler,
+    JSONRotatingHandler,
+    create_rotating_logger,
+    rotate_log_file,
+    get_log_files,
+)
 
-__all__ = ["YamlOrchestrator"]
-__version__ = "1.0.0"
+__all__ = [
+    "YamlOrchestrator",
+    "AgentRuntime",
+    "AgentRuntimeServer",
+    "SessionState",
+    "SessionStoreBase",
+    "MemorySessionStore",
+    "FileSessionStore",
+    "RedisSessionStore",
+    "create_session_store",
+    "AgentOSClient",
+    "PipelineEngine",
+    "ExecutionContext",
+    "StepResult",
+    "TemplateResolver",
+    "ToolRegistry",
+    "bash_tool",
+    "read_file_tool",
+    "write_file_tool",
+    "glob_tool",
+    "llm_chat_tool",
+    "web_search_tool",
+    "web_fetch_tool",
+    "register_builtin_tools",
+    "Observability",
+    "StructuredLogger",
+    "LogLevel",
+    "Tracer",
+    "Span",
+    "MetricsCollector",
+    "PerformanceProfiler",
+    "get_logger",
+    "set_logger",
+    "get_trace_context",
+    "set_trace_context",
+    "ImportAdapter",
+    "AdapterRegistry",
+    "CursorAdapter",
+    "ClaudeAdapter",
+    "CodeBuddyAdapter",
+    "GitHubAdapter",
+    "VSCodeAdapter",
+    "JetBrainsAdapter",
+    "OpenAIGPTsAdapter",
+    "GenericMarkdownAdapter",
+    "create_default_registry",
+    "MarketClient",
+    "AgentInfo",
+    "VersionInfo",
+    "SearchResult",
+    "UploadResult",
+    "DownloadResult",
+    "VersionDiff",
+    "Deployer",
+    # Resilience
+    "CircuitBreaker",
+    "CircuitBreakerOpenError",
+    "RetryPolicy",
+    "RetryExhaustedError",
+    "FallbackRegistry",
+    "resilient_call",
+    # Resource Limits
+    "ResourceLimiter",
+    "ResourceMonitor",
+    "MemoryLimitExceeded",
+    "CPULimitExceeded",
+    "FDLimitExceeded",
+    "with_resource_limits",
+    "set_process_limits",
+    # Hot Reload
+    "ConfigWatcher",
+    "HotReloadManager",
+    "FileSnapshot",
+    "create_agent_reload_manager",
+    "watch_file",
+    # Log Rotation
+    "RotatingFileHandler",
+    "JSONRotatingHandler",
+    "create_rotating_logger",
+    "rotate_log_file",
+    "get_log_files",
+]
+__version__ = "1.3.0"

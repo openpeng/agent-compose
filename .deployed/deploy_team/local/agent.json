@@ -1,0 +1,14 @@
+{
+  "name": "deploy_team",
+  "mode": "coordinate",
+  "description": "Deploy team",
+  "instructions": [],
+  "leader": null,
+  "members": [
+    {
+      "name": "a1",
+      "ref_type": "reference"
+    }
+  ],
+  "shared_state": true
+}

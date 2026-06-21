@@ -52,6 +52,9 @@ from agent_compose.deployer import Deployer
 # 市场相关模块（来自之前的 deploy_cli）
 from agent_compose.market_client import MarketClient
 from agent_compose.agent_runtime import AgentRuntime
+from agent_compose.agent_runtime_server import AgentRuntimeServer
+from agent_compose.session_store import create_session_store
+from agent_compose.agentos_client import AgentOSClient
 
 
 DEFAULT_MARKET_URL = "https://market.aitboy.cn"
@@ -89,6 +92,18 @@ def _add_local_parsers(sub: argparse._SubParsersAction) -> None:
     deploy_p.add_argument("name", help="Entity name")
 
     sub.add_parser("load-all", help="Load and show all local entities")
+
+    # serve — 启动运行时服务
+    serve_p = sub.add_parser("serve", help="Start AgentRuntime HTTP server")
+    serve_p.add_argument("--host", default="0.0.0.0", help="Bind host (default: 0.0.0.0)")
+    serve_p.add_argument("--port", type=int, default=8080, help="Bind port (default: 8080)")
+    serve_p.add_argument("--session-backend", default="memory", choices=["memory", "file", "redis"], help="Session storage backend")
+    serve_p.add_argument("--session-dir", default="./.sessions", help="Session file directory (for file backend)")
+    serve_p.add_argument("--session-ttl", type=int, default=3600, help="Session TTL in seconds (default: 3600)")
+    serve_p.add_argument("--model-provider", default="kimi", help="Default model provider")
+    serve_p.add_argument("--model-id", default="moonshot-v1-128k", help="Default model ID")
+    serve_p.add_argument("--base-url", default=None, help="Default API base URL")
+    serve_p.add_argument("--agentos-url", default=None, help="AgentOS URL for registration")
 
 
 def _do_list(orch: YamlOrchestrator, kind: str) -> int:
@@ -225,6 +240,40 @@ def _do_load_all(orch: YamlOrchestrator) -> int:
     )
     print(f"Loaded {total} entities")
     print(json.dumps(data, indent=2, ensure_ascii=False, default=str))
+    return 0
+
+
+def _do_serve(args: argparse.Namespace) -> int:
+    """启动 AgentRuntime HTTP 服务器"""
+    # 创建会话存储
+    store_kwargs = {}
+    if args.session_backend == "file":
+        store_kwargs["base_dir"] = args.session_dir
+    elif args.session_backend == "redis":
+        store_kwargs["redis_url"] = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+
+    session_store = create_session_store(args.session_backend, **store_kwargs)
+
+    # 创建服务器
+    server = AgentRuntimeServer(
+        host=args.host,
+        port=args.port,
+        session_store=session_store,
+        session_ttl=args.session_ttl,
+        default_model_provider=args.model_provider,
+        default_model_id=args.model_id,
+        default_base_url=args.base_url,
+        agentos_url=args.agentos_url,
+    )
+
+    # AgentOS 注册
+    if args.agentos_url:
+        print(f"Registering with AgentOS at {args.agentos_url} ...")
+        result = server.register_with_agentos(args.agentos_url)
+        print(f"  {result}")
+
+    # 启动服务
+    server.serve()
     return 0
 
 
@@ -562,6 +611,9 @@ def main(argv: Optional[list] = None) -> int:
 
     if cmd == "load-all":
         return _do_load_all(orch)
+
+    if cmd == "serve":
+        return _do_serve(args)
 
     parser.print_help()
     return 1

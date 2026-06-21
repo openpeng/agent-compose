@@ -1,0 +1,22 @@
+{
+  "name": "deploy_test",
+  "role": "Deployer",
+  "description": "Deploy test",
+  "instructions": [
+    "Deploy"
+  ],
+  "tools": [],
+  "model": {
+    "provider": "openai",
+    "id": "gpt-4o",
+    "api_key": "",
+    "module": "agno.models.openai",
+    "class_name": "OpenAIChat",
+    "params": {}
+  },
+  "memory": null,
+  "knowledge": null,
+  "markdown": true,
+  "add_datetime_to_instructions": false,
+  "debug_mode": false
+}

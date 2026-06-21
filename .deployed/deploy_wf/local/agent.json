@@ -1,0 +1,19 @@
+{
+  "name": "deploy_wf",
+  "description": "Deploy workflow",
+  "entry_task": "",
+  "steps": [
+    {
+      "name": "s1",
+      "type": "agent",
+      "description": "",
+      "agent": {
+        "name": "a1"
+      },
+      "input": "",
+      "output_key": "k1"
+    }
+  ],
+  "inputs": [],
+  "outputs": []
+}
