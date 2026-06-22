@@ -40,6 +40,14 @@ agent-compose/
 │   ├── deployer.py
 │   ├── deploy_cli.py
 │   ├── cli.py                # ★ 命令行主入口
+│   ├── resilience.py         # 弹性机制（重试/熔断/降级）
+│   ├── resource_limits.py    # 资源限制管理
+│   ├── hot_reload.py         # 配置热重载
+│   ├── log_rotation.py       # 日志轮转
+│   ├── wizard.py             # 交互式创建向导
+│   ├── templates.py          # Agent/Team/Workflow 模板管理
+│   ├── i18n.py                # 国际化支持
+│   ├── mcp_servers/          # MCP Server 配置
 │   └── packagers/            # 打包器
 ├── examples/                 # 示例项目
 ├── tests/                    # 单元测试
@@ -123,12 +131,20 @@ Kimi WebBridge 通过浏览器扩展 + 本地 daemon，让 Agent 直接操作浏
 
 ## Agent JSON v2 规范（节选）
 
+`capabilities` 支持两种格式：
+
+- **简单格式**（字符串数组）：`"capabilities": ["web_search", "bash", "read_file"]`
+- **详细格式**（对象数组）：`"capabilities": [{ "type": "tool_call", "name": "browser_navigate", ... }]`
+
 ```json
 {
   "schema_version": "2.0",
-  "identity": { "name": "kimi-webbridge-operator", "version": "1.1.0", "display_name": "🌉 Kimi WebBridge", ... },
+  "identity": { "name": "kimi-webbridge-operator", "version": "1.1.0", "display_name": "Kimi WebBridge", ... },
   "instructions": { "format": "markdown", "source": "inline", "content": "..." },
-  "capabilities": [ { "type": "tool_call", "name": "browser_navigate", ... } ],
+  "capabilities": [
+    { "type": "tool_call", "name": "browser_navigate" },
+    { "type": "tool_call", "name": "browser_click" }
+  ],
   "mcp_servers": [ { "name": "kimi-webbridge", "type": "kimi-webbridge", "base_url": "http://127.0.0.1:10086" } ],
   "metadata": { ... }
 }
