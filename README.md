@@ -158,6 +158,90 @@ Kimi WebBridge 通过浏览器扩展 + 本地 daemon，让 Agent 直接操作浏
 python run_tests.py
 ```
 
+## Skill / MCP 市场引用（v3.1）
+
+Agent JSON v2.0+ 支持通过 `ref` + `version` + `market_url` 引用市场已发布的 Skill 和 MCP Server 包，实现依赖的自动解析与合并。
+
+### 引用格式示例
+
+```json
+{
+  "schema_version": "2.0",
+  "identity": { "name": "my-agent", "version": "1.0.0" },
+  "skills": [
+    {
+      "ref": "html-anything",
+      "version": "^1.0.0",
+      "market_url": "https://market.aitboy.cn",
+      "source": "market"
+    }
+  ],
+  "mcp_servers": [
+    {
+      "ref": "tapd",
+      "version": "^1.0.0",
+      "market_url": "https://market.aitboy.cn",
+      "source": "market",
+      "env_override": { "TAPD_WORKSPACE_ID": "12345" }
+    }
+  ]
+}
+```
+
+### 版本约束规则
+
+| 语法 | 含义 | 示例 |
+|------|------|------|
+| `1.2.3` | 精确版本 | `"1.2.3"` |
+| `^1.2.3` | 兼容版本（>=1.2.3 <2.0.0） | `"^1.2.3"` |
+| `~1.2.3` | 近似版本（>=1.2.3 <1.3.0） | `"~1.2.3"` |
+| `>=1.0.0` | 范围版本 | `">=1.0.0 <2.0.0"` |
+
+### 依赖解析流程
+
+当执行 `python -m agent_compose.cli market run <agent>` 时：
+
+1. **下载 Agent JSON** — 从市场或本地缓存获取主 Agent 定义
+2. **扫描引用** — 识别 `skills` 和 `mcp_servers` 中 `source: "market"` 的条目
+3. **解析版本** — 按语义化版本约束匹配市场最新可用版本
+4. **下载依赖** — 从市场拉取 Skill 包（`skill.json` + `SKILL.md`）和 MCP 包（`mcp-server.json` + `mcp-config.json`）
+5. **合并内容** — 将 Skill 指令追加到 Agent instructions，将 MCP 配置注入 `mcp_servers`
+6. **运行 Agent** — 使用解析后的完整配置启动 AgentRuntime
+
+### 缓存管理
+
+本地缓存默认存储于 `~/.cache/agent-compose/market/`：
+
+```bash
+# 查看缓存状态
+python -m agent_compose.cli market health
+
+# 下载时强制刷新缓存
+python -m agent_compose.cli market download <agent> --refresh
+
+# 运行时不使用缓存
+python -m agent_compose.cli market run <agent> --no-cache
+```
+
+缓存键规则：`<market_host>/<entity_type>/<ref>@<resolved_version>.json`
+
+### 混合模式
+
+内联定义与市场引用可混合使用：
+
+```json
+{
+  "skills": [
+    { "ref": "html-anything", "version": "^1.0.0", "source": "market" },
+    { "name": "custom-skill", "display_name": "Custom", "source": "inline" }
+  ],
+  "mcp_servers": [
+    { "ref": "tapd", "version": "^1.0.0", "source": "market" },
+    { "name": "local-bridge", "type": "kimi-webbridge", "base_url": "http://127.0.0.1:10086" }
+  ]
+}
+```
+
 ## 配置示例（YAML）
 
 ### Agent
