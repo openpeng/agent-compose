@@ -668,6 +668,30 @@ def _do_market_run(args: argparse.Namespace) -> int:
     print(f"  {_success('✓')} {_('run_api_key')}: {'set' if api_key else _error('missing')}")
     print(f"  {_success('✓')} {_('run_webbridge_token')}: {'set' if webbridge_token else 'not set (optional)'}")
 
+    # v3.1: 解析 Skill/MCP 引用
+    skills_count = len(agent_json.get("skills", []))
+    mcp_ref_count = len([m for m in agent_json.get("mcp_servers", []) if m.get("ref")])
+    if skills_count > 0 or mcp_ref_count > 0:
+        print(f"  {_info('ℹ')} Resolving {skills_count} skill(s) and {mcp_ref_count} MCP reference(s)...")
+        import asyncio
+        from agent_compose.skill_mcp_resolver import SkillMCPResolver
+        resolver = SkillMCPResolver(market_url=args.market_url or DEFAULT_MARKET_URL)
+        resolved = asyncio.get_event_loop().run_until_complete(resolver.resolve_agent(agent_json))
+        if resolved.errors:
+            for err in resolved.errors:
+                print(f"  {_error('✗')} {err}")
+        if resolved.warnings:
+            for warn in resolved.warnings:
+                print(f"  {_warning('⚠')} {warn}")
+        for skill in resolved.skills:
+            src = "cache" if skill.from_cache else "market"
+            print(f"  {_success('✓')} Skill: {skill.display_name or skill.name}@{skill.version} ({src})")
+        for mcp in resolved.mcp_servers:
+            src = "cache" if mcp.from_cache else "market"
+            print(f"  {_success('✓')} MCP: {mcp.display_name or mcp.name}@{mcp.version} ({src})")
+        agent_json = resolver.merge_to_agent(agent_json, resolved)
+        print(f"  {_success('✓')} Dependencies resolved and merged")
+
     runtime = AgentRuntime(
         agent_id=agent_id,
         agent_json=agent_json,

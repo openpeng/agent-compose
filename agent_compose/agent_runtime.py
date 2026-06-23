@@ -68,6 +68,9 @@ class AgentRuntime:
         self.capabilities = self.agent.get("capabilities", []) or []
         self.mcp_servers = self.agent.get("mcp_servers", []) or []
 
+        # v3.1: 解析 skills 引用（内联 + 市场引用）
+        self.skills = self.agent.get("skills", []) or []
+
         # MCP 客户端（延迟初始化）
         self._mcp_clients = {}  # name -> MCPStdioClient / SSEClient
         self._tool_name_to_mcp = {}  # tool_name -> mcp_name
